@@ -197,7 +197,7 @@
     <div class="property-box">
       <h3>Property Information</h3>
 
-      <p><b>Property:</b> <span id="showPropertyName"></span></p>
+      
       <p><b>Address:</b> <span id="showAddress"></span></p>
       <p><b>Rent:</b> $<span id="showRent"></span></p>
       <p><b>Available Date:</b> <span id="showAvailableDate"></span></p>
@@ -364,14 +364,15 @@ function fillApplicationInfo(app) {
   document.getElementById("petDepositHidden").value = app.petDeposit || "";
   document.getElementById("notesHidden").value = app.notes || "";
 
-  document.getElementById("showPropertyName").innerText = app.propertyName || "";
-  document.getElementById("showAddress").innerText = app.address || "";
-  document.getElementById("showRent").innerText = app.rent || "";
-  document.getElementById("showAvailableDate").innerText = app.availableDate || "";
-  document.getElementById("showDeposit").innerText = app.deposit || "";
-  document.getElementById("showPetsAllowed").innerText = app.petsAllowed || "";
-  document.getElementById("showPetDeposit").innerText = app.petDeposit || "N/A";
-  document.getElementById("showNotes").innerText = app.notes || "N/A";
+ document.getElementById("showPropertyName").innerText = "";
+document.getElementById("showAddress").innerText = app.address || "";
+document.getElementById("showRent").innerText = app.rent || "";
+document.getElementById("showAvailableDate").innerText = app.availableDate || "";
+document.getElementById("showDeposit").innerText = app.deposit || "";
+
+document.getElementById("showPetsAllowed").parentElement.style.display = "none";
+document.getElementById("showPetDeposit").parentElement.style.display = "none";
+document.getElementById("showNotes").parentElement.style.display = "none";
 }
 
 function handleApplicationType() {
