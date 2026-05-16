@@ -174,7 +174,7 @@
   </div>
 
   <div class="box">
-    <h3>Choose Saved Property From Dropbox</h3>
+    <h3>Choose Saved Property</h3>
 
     <label>Property</label>
     <select id="propertyDropdown" onchange="choosePropertyFromDropdown()">
@@ -184,7 +184,6 @@
     <div id="selectedPropertyPreview" class="card hidden"></div>
   </div>
 
- 
   <div class="box hidden" id="tenantBox">
     <h3>Tenant Application Invite</h3>
 
@@ -297,6 +296,10 @@ async function api(path, options = {}){
 function showStatus(message, type){
   const box = document.getElementById("statusMessage");
 
+  if(!box){
+    return;
+  }
+
   box.innerHTML =
     `<p class="${type === "error" ? "error-message" : "success-message"}">${message}</p>`;
 }
@@ -350,8 +353,6 @@ async function loadProperties(){
   try{
     const data = await api("/api/properties");
     properties = data.properties || [];
-
-    renderProperties();
     renderPropertyDropdown();
   }catch(error){
     showStatus("Could not load properties. Check admin password or backend.", "error");
@@ -381,36 +382,6 @@ function choosePropertyFromDropdown(){
   }
 
   selectProperty(id);
-}
-
-function renderProperties(){
-  const list = document.getElementById("propertiesList");
-  list.innerHTML = "";
-
-  if(properties.length === 0){
-    list.innerHTML = "<p>No properties yet.</p>";
-    return;
-  }
-
-  properties.forEach(property => {
-    const div = document.createElement("div");
-    div.className = "card";
-
-    div.innerHTML = `
-      <h3>${property.propertyName || ""}</h3>
-      <p><b>Address:</b> ${property.address || ""}</p>
-      <p><b>Rent:</b> $${property.defaultRent || ""}</p>
-      <p><b>Deposit:</b> $${property.defaultDeposit || ""}</p>
-      <p><b>Available:</b> ${property.defaultAvailableDate || ""}</p>
-      <p><b>Pets:</b> ${property.defaultPetsAllowed || "No"}</p>
-      ${property.defaultPetsAllowed !== "No" ? `<p><b>Pet Deposit / Rent:</b> ${property.defaultPetDeposit || ""}</p>` : ""}
-      <button onclick="selectProperty('${property.id}')">Use This Property</button>
-      <button class="gray" onclick="editProperty('${property.id}')">Edit</button>
-      <button class="danger" onclick="deleteProperty('${property.id}')">Delete</button>
-    `;
-
-    list.appendChild(div);
-  });
 }
 
 async function saveProperty(){
@@ -447,17 +418,26 @@ async function saveProperty(){
     }
 
     cancelPropertyForm();
-    loadProperties();
+    await loadProperties();
     showStatus("Property saved.", "success");
   }catch(error){
     showStatus("Failed to save property.", "error");
   }
 }
 
-function editProperty(id){
+function editPropertyFromSelected(){
+  const id = document.getElementById("propertyDropdown").value;
+
+  if(!id){
+    showStatus("Select a property first.", "error");
+    return;
+  }
+
   const property = properties.find(p => p.id === id);
 
-  if(!property) return;
+  if(!property){
+    return;
+  }
 
   document.getElementById("propertyFormBox").classList.remove("hidden");
   document.getElementById("propertyFormTitle").innerText = "Edit Property";
@@ -475,8 +455,15 @@ function editProperty(id){
   togglePetDeposit();
 }
 
-async function deleteProperty(id){
-  if(!confirm("Delete property?")){
+async function deleteSelectedProperty(){
+  const id = document.getElementById("propertyDropdown").value;
+
+  if(!id){
+    showStatus("Select a property first.", "error");
+    return;
+  }
+
+  if(!confirm("Delete selected property?")){
     return;
   }
 
@@ -485,7 +472,10 @@ async function deleteProperty(id){
       method:"DELETE"
     });
 
-    loadProperties();
+    document.getElementById("selectedPropertyPreview").classList.add("hidden");
+    document.getElementById("tenantBox").classList.add("hidden");
+
+    await loadProperties();
     showStatus("Property deleted.", "success");
   }catch(error){
     showStatus("Failed to delete property.", "error");
@@ -521,6 +511,9 @@ function selectProperty(id){
     <p><b>Deposit:</b> $${property.defaultDeposit || ""}</p>
     <p><b>Available:</b> ${property.defaultAvailableDate || ""}</p>
     <p><b>Pets:</b> ${property.defaultPetsAllowed || "No"}</p>
+    ${property.defaultPetsAllowed !== "No" ? `<p><b>Pet Deposit / Rent:</b> ${property.defaultPetDeposit || ""}</p>` : ""}
+    <button class="gray" onclick="editPropertyFromSelected()">Edit Selected Property</button>
+    <button class="danger" onclick="deleteSelectedProperty()">Delete Selected Property</button>
   `;
 
   preview.classList.remove("hidden");
@@ -606,9 +599,6 @@ ${application.petDeposit || "N/A"}
 Please complete the rental application using this link:
 
 ${lastGeneratedLink}
-
-Property:
-${application.propertyName}
 
 Address:
 ${application.address}
