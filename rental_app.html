@@ -22,6 +22,7 @@
 
     h2 {
       text-align: center;
+      margin-bottom: 25px;
     }
 
     h3 {
@@ -43,11 +44,6 @@
       border-radius: 6px;
       border: 1px solid #ccc;
       box-sizing: border-box;
-    }
-
-    small {
-      font-weight: normal;
-      color: #555;
     }
 
     button {
@@ -101,6 +97,10 @@
       color: #333;
       margin-top: 5px;
     }
+
+    small {
+      color: #666;
+    }
   </style>
 </head>
 
@@ -112,7 +112,7 @@
 
   <form 
     action="https://formsubmit.co/oceanvacationsmb@gmail.com" 
-    method="POST" 
+    method="POST"
     enctype="multipart/form-data"
     onsubmit="return validateForm()"
   >
@@ -129,11 +129,11 @@
 
     <div id="applicantsBox"></div>
 
-    <label>Number of Other Occupants</label>
+    <label>Number of Additional Occupants</label>
     <input 
       type="number" 
       id="occupantsCount" 
-      name="Number of Other Occupants" 
+      name="Number of Additional Occupants" 
       min="0"
       onchange="createOccupantFields()"
     >
@@ -181,16 +181,24 @@
     <input type="tel" name="Current Landlord Phone">
 
     <div class="disclaimer">
+
       <strong>Credit Check and Background Check Authorization</strong>
+
       <br><br>
-      By submitting this application, applicant authorizes the landlord, property manager, owner, or authorized representative to verify the information provided, contact current and previous landlords, verify employment and income, review uploaded documents, and perform a credit check, background check, eviction history search, criminal history search, and rental history verification as part of the rental application process.
+
+      By submitting this application, applicant authorizes the landlord, property manager, owner, or authorized representative to verify all information provided, contact current and previous landlords, verify employment and income, review uploaded documents, and perform a credit check, background check, eviction history search, criminal history search, and rental history verification as part of the rental application process.
+
       <br><br>
+
       Applicant understands that approval is not guaranteed and may depend on income, credit, background, rental history, owner approval, HOA/property rules, and other screening requirements.
+
     </div>
 
     <div class="checkbox-row">
-      <input type="checkbox" name="Credit and Background Check Agreement" value="Agreed" required>
-      <label>I agree and authorize credit check, background check, rental history verification, employment verification, and income verification.</label>
+      <input type="checkbox" required>
+      <label>
+        I authorize credit check, background check, rental verification, employment verification, and income verification.
+      </label>
     </div>
 
     <label>Upload Credit Report from Credit Karma or Similar</label>
@@ -212,6 +220,7 @@
 <script>
 
 function handleApplicationType() {
+
   const type = document.getElementById("applicationType").value;
   const box = document.getElementById("applicantsBox");
 
@@ -229,7 +238,8 @@ function handleApplicationType() {
   }
 }
 
-function nameFields(prefix, required = true) {
+function createNameFields(prefix, required = true) {
+
   return `
     <label>First Name</label>
     <input type="text" name="${prefix} First Name" ${required ? "required" : ""}>
@@ -243,16 +253,24 @@ function nameFields(prefix, required = true) {
 }
 
 function createApplicantFields(number, askRelationship) {
+
   return `
+
     <div class="section-box">
 
       <h3>Applicant ${number}</h3>
 
-      ${nameFields("Applicant " + number, true)}
+      ${createNameFields("Applicant " + number)}
 
       ${askRelationship ? `
+
         <label>Relationship to Main Applicant</label>
-        <select name="Applicant ${number} Relationship" onchange="toggleRelationshipInfo(this, ${number})" required>
+
+        <select 
+          name="Applicant ${number} Relationship"
+          onchange="toggleRelationshipInfo(this, ${number})"
+          required
+        >
           <option value="">Select</option>
           <option>Spouse</option>
           <option>Partner</option>
@@ -262,21 +280,20 @@ function createApplicantFields(number, askRelationship) {
         </select>
 
         <div id="relationshipInfo${number}" style="display:none;">
+
           <label>Explain Relationship</label>
           <input type="text" name="Applicant ${number} Relationship Explanation">
+
         </div>
+
       ` : ""}
 
-      <label>Will this applicant be signing the lease agreement?</label>
-      <select name="Applicant ${number} Signing Lease" onchange="toggleLeaseInfo(this, ${number})" required>
-        <option value="">Select</option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
+      <input type="hidden" name="Applicant ${number} Signing Lease" value="Yes">
 
-      <div id="leaseInfo${number}" style="display:none;">
+      <div id="leaseInfo${number}" style="display:block;">
 
         <label>Social Security Number</label>
+
         <input
           type="password"
           id="ssn${number}"
@@ -286,13 +303,18 @@ function createApplicantFields(number, askRelationship) {
           oninput="showLastFour(${number})"
         >
 
-        <input type="hidden" id="ssnLast4${number}" name="Applicant ${number} SSN Last 4">
+        <input 
+          type="hidden"
+          id="ssnLast4${number}"
+          name="Applicant ${number} SSN Last 4"
+        >
 
         <div class="last4" id="last4Display${number}">
           Last 4:
         </div>
 
         <label>Retype Social Security Number</label>
+
         <input
           type="password"
           id="retypeSsn${number}"
@@ -308,6 +330,7 @@ function createApplicantFields(number, askRelationship) {
         <input type="tel" name="Applicant ${number} Phone Number">
 
         <label>Email</label>
+
         <input
           type="email"
           id="email${number}"
@@ -316,6 +339,7 @@ function createApplicantFields(number, askRelationship) {
         >
 
         <label>Retype Email</label>
+
         <input
           type="email"
           id="retypeEmail${number}"
@@ -324,14 +348,19 @@ function createApplicantFields(number, askRelationship) {
         >
 
         <label>Upload Photo ID</label>
+
         <input 
-          type="file" 
+          type="file"
           name="Applicant ${number} Photo ID"
           accept="image/*,.pdf"
         >
 
         <label>Does this applicant have income?</label>
-        <select name="Applicant ${number} Has Income" onchange="toggleIncomeInfo(this, ${number})">
+
+        <select 
+          name="Applicant ${number} Has Income"
+          onchange="toggleIncomeInfo(this, ${number})"
+        >
           <option value="">Select</option>
           <option>Yes</option>
           <option>No</option>
@@ -340,6 +369,7 @@ function createApplicantFields(number, askRelationship) {
         <div id="incomeInfo${number}" style="display:none;">
 
           <label>Employment Status</label>
+
           <select name="Applicant ${number} Employment Status">
             <option value="">Select</option>
             <option>Employed</option>
@@ -365,8 +395,9 @@ function createApplicantFields(number, askRelationship) {
           <input type="text" name="Applicant ${number} Employment Length">
 
           <label>Upload Proof of Income</label>
+
           <input 
-            type="file" 
+            type="file"
             name="Applicant ${number} Proof of Income"
             accept="image/*,.pdf"
           >
@@ -376,32 +407,41 @@ function createApplicantFields(number, askRelationship) {
       </div>
 
     </div>
+
   `;
 }
 
 function createOccupantFields() {
+
   const count = document.getElementById("occupantsCount").value;
   const box = document.getElementById("occupantsBox");
 
   box.innerHTML = "";
 
   for (let i = 1; i <= count; i++) {
+
     box.innerHTML += `
+
       <div class="section-box">
 
-        <h3>Other Occupant ${i}</h3>
+        <h3>Additional Occupant ${i}</h3>
 
-        ${nameFields("Other Occupant " + i, false)}
+        ${createNameFields("Additional Occupant " + i, false)}
 
         <label>Adult or Child</label>
-        <select name="Other Occupant ${i} Adult or Child" onchange="toggleAdultChildInfo(this, ${i})">
+
+        <select 
+          name="Additional Occupant ${i} Adult or Child"
+          onchange="toggleAdultChildInfo(this, ${i})"
+        >
           <option value="">Select</option>
           <option>Adult</option>
           <option>Child</option>
         </select>
 
         <label>Relationship to Applicant</label>
-        <select name="Other Occupant ${i} Relationship">
+
+        <select name="Additional Occupant ${i} Relationship">
           <option value="">Select</option>
           <option>Child</option>
           <option>Spouse</option>
@@ -412,22 +452,20 @@ function createOccupantFields() {
 
         <div id="adultInfo${i}" style="display:none;">
 
-          <label>Will this adult be signing the lease agreement?</label>
-          <select name="Other Occupant ${i} Signing Lease">
-            <option value="">Select</option>
-            <option>No</option>
-            <option>Yes</option>
-          </select>
-
           <label>Upload Photo ID</label>
+
           <input 
-            type="file" 
-            name="Other Occupant ${i} Photo ID"
+            type="file"
+            name="Additional Occupant ${i} Photo ID"
             accept="image/*,.pdf"
           >
 
           <label>Does this adult have income?</label>
-          <select name="Other Occupant ${i} Has Income" onchange="toggleOtherOccupantIncome(this, ${i})">
+
+          <select 
+            name="Additional Occupant ${i} Has Income"
+            onchange="toggleOtherOccupantIncome(this, ${i})"
+          >
             <option value="">Select</option>
             <option>No</option>
             <option>Yes</option>
@@ -436,18 +474,19 @@ function createOccupantFields() {
           <div id="otherIncomeInfo${i}" style="display:none;">
 
             <label>Employer Name</label>
-            <input type="text" name="Other Occupant ${i} Employer Name">
+            <input type="text" name="Additional Occupant ${i} Employer Name">
 
             <label>Employer Phone</label>
-            <input type="tel" name="Other Occupant ${i} Employer Phone">
+            <input type="tel" name="Additional Occupant ${i} Employer Phone">
 
             <label>Monthly Income</label>
-            <input type="text" name="Other Occupant ${i} Monthly Income">
+            <input type="text" name="Additional Occupant ${i} Monthly Income">
 
             <label>Upload Proof of Income</label>
+
             <input 
-              type="file" 
-              name="Other Occupant ${i} Proof of Income"
+              type="file"
+              name="Additional Occupant ${i} Proof of Income"
               accept="image/*,.pdf"
             >
 
@@ -456,80 +495,125 @@ function createOccupantFields() {
         </div>
 
         <div id="childInfo${i}" style="display:none;">
-          <small>Child occupants cannot sign the lease agreement and do not need to upload ID or income documents.</small>
+
+          <small>
+            Child occupants cannot sign the lease agreement and do not need to upload ID or income documents.
+          </small>
+
         </div>
 
       </div>
+
     `;
   }
 }
 
 function showLastFour(number) {
-  const ssn = document.getElementById("ssn" + number).value.replace(/\D/g, "");
+
+  const ssn = document
+    .getElementById("ssn" + number)
+    .value
+    .replace(/\D/g, "");
+
   const last4 = ssn.length >= 4 ? ssn.slice(-4) : "";
 
-  document.getElementById("last4Display" + number).innerText = "Last 4: " + last4;
+  document.getElementById("last4Display" + number).innerText =
+    "Last 4: " + last4;
+
   document.getElementById("ssnLast4" + number).value = last4;
 }
 
-function toggleLeaseInfo(select, number) {
-  const section = document.getElementById("leaseInfo" + number);
-  section.style.display = select.value === "Yes" ? "block" : "none";
-}
-
 function toggleIncomeInfo(select, number) {
+
   const section = document.getElementById("incomeInfo" + number);
-  section.style.display = select.value === "Yes" ? "block" : "none";
+
+  section.style.display =
+    select.value === "Yes" ? "block" : "none";
 }
 
 function toggleRelationshipInfo(select, number) {
+
   const section = document.getElementById("relationshipInfo" + number);
-  section.style.display = select.value === "Other" ? "block" : "none";
+
+  section.style.display =
+    select.value === "Other" ? "block" : "none";
 }
 
 function toggleAdultChildInfo(select, number) {
+
   const adultSection = document.getElementById("adultInfo" + number);
   const childSection = document.getElementById("childInfo" + number);
 
   if (select.value === "Adult") {
+
     adultSection.style.display = "block";
     childSection.style.display = "none";
+
   } else if (select.value === "Child") {
+
     adultSection.style.display = "none";
     childSection.style.display = "block";
+
   } else {
+
     adultSection.style.display = "none";
     childSection.style.display = "none";
   }
 }
 
 function toggleOtherOccupantIncome(select, number) {
+
   const section = document.getElementById("otherIncomeInfo" + number);
-  section.style.display = select.value === "Yes" ? "block" : "none";
+
+  section.style.display =
+    select.value === "Yes" ? "block" : "none";
 }
 
 function toggleEvictionInfo(select) {
+
   const section = document.getElementById("evictionInfo");
-  section.style.display = select.value === "Yes" ? "block" : "none";
+
+  section.style.display =
+    select.value === "Yes" ? "block" : "none";
 }
 
 function validateForm() {
-  const applicantType = document.getElementById("applicationType").value;
-  const totalApplicants = applicantType === "Joint Applicants" ? 2 : 1;
+
+  const applicationType =
+    document.getElementById("applicationType").value;
+
+  const totalApplicants =
+    applicationType === "Joint Applicants" ? 2 : 1;
 
   for (let i = 1; i <= totalApplicants; i++) {
-    const ssn = document.getElementById("ssn" + i);
-    const retypeSsn = document.getElementById("retypeSsn" + i);
-    const email = document.getElementById("email" + i);
-    const retypeEmail = document.getElementById("retypeEmail" + i);
+
+    const ssn =
+      document.getElementById("ssn" + i);
+
+    const retypeSsn =
+      document.getElementById("retypeSsn" + i);
+
+    const email =
+      document.getElementById("email" + i);
+
+    const retypeEmail =
+      document.getElementById("retypeEmail" + i);
 
     if (ssn && retypeSsn && ssn.value !== retypeSsn.value) {
-      alert("Social Security Numbers do not match for Applicant " + i);
+
+      alert(
+        "Social Security Numbers do not match for Applicant " + i
+      );
+
       return false;
     }
 
     if (email && retypeEmail && email.value !== retypeEmail.value) {
-      alert("Emails do not match for Applicant " + i);
+
+      alert(
+        "Emails do not match for Applicant " + i
+      );
+
       return false;
     }
   }
