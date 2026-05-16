@@ -254,6 +254,26 @@
 </div>
 
 <script>
+
+window.onload = function(){
+
+  const savedPassword =
+    localStorage.getItem("rentapp_admin_password");
+
+  if(savedPassword){
+
+    document.getElementById("adminPassword").value =
+      savedPassword;
+
+    adminPassword = savedPassword;
+
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("adminArea").classList.remove("hidden");
+
+    loadProperties();
+  }
+}
+  
 const API_BASE = "https://rentapp-0jgt.onrender.com";
 
 let adminPassword = "";
@@ -261,12 +281,19 @@ let properties = [];
 let lastGeneratedLink = "";
 
 function login(){
-  adminPassword = document.getElementById("adminPassword").value;
+
+  adminPassword =
+    document.getElementById("adminPassword").value;
 
   if(!adminPassword){
     showStatus("Enter password", "error");
     return;
   }
+
+  localStorage.setItem(
+    "rentapp_admin_password",
+    adminPassword
+  );
 
   document.getElementById("loginBox").classList.add("hidden");
   document.getElementById("adminArea").classList.remove("hidden");
