@@ -21,7 +21,9 @@
       margin-bottom:25px;
     }
 
-    h2,h3{margin-top:0;}
+    h2,h3{
+      margin-top:0;
+    }
 
     label{
       font-weight:bold;
@@ -49,8 +51,13 @@
       font-size:15px;
     }
 
-    .danger{background:#c62828;}
-    .gray{background:#777;}
+    .danger{
+      background:#c62828;
+    }
+
+    .gray{
+      background:#777;
+    }
 
     .row{
       display:grid;
@@ -66,7 +73,9 @@
       margin-top:15px;
     }
 
-    .hidden{display:none;}
+    .hidden{
+      display:none;
+    }
 
     .result{
       background:#f1f1f1;
@@ -75,7 +84,9 @@
       margin-top:20px;
     }
 
-    textarea.message{height:180px;}
+    textarea.message{
+      height:180px;
+    }
   </style>
 </head>
 
@@ -344,7 +355,6 @@ function renderProperties(){
 
 async function saveProperty(){
   const id = document.getElementById("propertyId").value;
-
   const petsAllowed = document.getElementById("defaultPetsAllowed").value;
 
   const body = {
@@ -479,6 +489,19 @@ async function createApplicationLink(){
   document.getElementById("generatedLink").innerHTML =
     `<a href="${lastGeneratedLink}" target="_blank">${lastGeneratedLink}</a>`;
 
+  let petText = "";
+
+  if(application.petsAllowed !== "No"){
+    petText =
+`Pets:
+${application.petsAllowed}
+
+Pet Deposit / Pet Rent:
+${application.petDeposit || "N/A"}
+
+`;
+  }
+
   document.getElementById("tenantMessage").value =
 `Hi,
 
@@ -501,13 +524,7 @@ ${application.availableDate || "N/A"}
 Security Deposit:
 $${application.deposit}
 
-Pets:
-${application.petsAllowed}
-
-${application.petsAllowed !== "No" ? `Pet Deposit / Pet Rent:
-${application.petDeposit || "N/A"}
-
-` : ""}Thank you`;
+${petText}Thank you`;
 }
 
 function copyLink(){
