@@ -579,6 +579,20 @@ function createApplicantFields(number, askRelationship) {
 
       <input type="hidden" name="Applicant ${number} Signing Lease" value="Yes">
 
+      <div class="checkbox-row">
+        <input
+          type="checkbox"
+          id="noSsn${number}"
+          name="Applicant ${number} No SSN"
+          value="Yes"
+          onchange="toggleNoSSN(${number})"
+        >
+
+        <label for="noSsn${number}">
+          I do not have a Social Security Number
+        </label>
+      </div>
+
       <label>Social Security Number</label>
       <input
         type="text"
@@ -693,6 +707,44 @@ function createOccupantFields() {
   }
 }
 
+function toggleNoSSN(number){
+  const checked = document.getElementById("noSsn" + number).checked;
+  const ssn = document.getElementById("ssn" + number);
+  const retype = document.getElementById("retypeSsn" + number);
+  const hidden = document.getElementById("realSsn" + number);
+  const error = document.getElementById("ssnError" + number);
+
+  if(checked){
+    ssn.required = false;
+    retype.required = false;
+
+    ssn.value = "";
+    retype.value = "";
+    hidden.value = "";
+
+    ssn.dataset.realValue = "";
+    retype.dataset.realValue = "";
+
+    ssn.disabled = true;
+    retype.disabled = true;
+
+    ssn.style.background = "#eee";
+    retype.style.background = "#eee";
+    retype.style.border = "1px solid #ccc";
+
+    error.style.display = "none";
+  } else {
+    ssn.required = true;
+    retype.required = true;
+
+    ssn.disabled = false;
+    retype.disabled = false;
+
+    ssn.style.background = "white";
+    retype.style.background = "white";
+  }
+}
+
 function formatSSN(input) {
   let value = input.value.replace(/\D/g, "");
 
@@ -736,6 +788,12 @@ function unmaskSSN(input) {
 }
 
 function checkSSNMatch(number) {
+  const noSSN = document.getElementById("noSsn" + number)?.checked;
+
+  if(noSSN){
+    return;
+  }
+
   const ssn = document.getElementById("ssn" + number);
   const retype = document.getElementById("retypeSsn" + number);
   const error = document.getElementById("ssnError" + number);
@@ -800,6 +858,8 @@ function validateForm() {
   const totalApplicants = applicationType === "Joint Applicants" ? 2 : 1;
 
   for (let i = 1; i <= totalApplicants; i++) {
+    const noSSN = document.getElementById("noSsn" + i)?.checked;
+
     const ssn = document.getElementById("ssn" + i);
     const retypeSsn = document.getElementById("retypeSsn" + i);
     const email = document.getElementById("email" + i);
@@ -810,7 +870,7 @@ function validateForm() {
     const realSSN = ssn.dataset.realValue || ssn.value.replace(/\D/g, "");
     const realRetypeSSN = retypeSsn.dataset.realValue || retypeSsn.value.replace(/\D/g, "");
 
-    if (realSSN.length !== 9 || realRetypeSSN.length !== 9) {
+    if (!noSSN && (realSSN.length !== 9 || realRetypeSSN.length !== 9)) {
       ssn.style.border = "2px solid red";
       retypeSsn.style.border = "2px solid red";
       ssnError.innerText = "Please enter a valid 9 digit SSN";
@@ -819,7 +879,7 @@ function validateForm() {
       return false;
     }
 
-    if (realSSN !== realRetypeSSN) {
+    if (!noSSN && realSSN !== realRetypeSSN) {
       retypeSsn.style.border = "2px solid red";
       ssnError.innerText = "SSN numbers do not match";
       ssnError.style.display = "block";
