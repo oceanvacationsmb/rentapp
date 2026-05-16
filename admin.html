@@ -220,7 +220,7 @@
     <label>Notes</label>
     <textarea id="appNotes" rows="4"></textarea>
 
-    <button class="green" onclick="createApplicationLink(event)">Generate Link</button>
+    <button class="green" onclick="createApplicationLink(event)">Invite To Apply</button>
 
     <div class="result hidden" id="linkResult">
       <h3>Application Link Created</h3>
@@ -590,8 +590,26 @@ $${application.deposit}
 
 ${petText}Thank you`;
 
-    alert("Application link created.");
 
+const subject =
+  encodeURIComponent("Rental Application");
+
+const body =
+  encodeURIComponent(
+    document.getElementById("tenantMessage").value
+  );
+
+const gmailUrl =
+
+`https://mail.google.com/mail/?view=cm&fs=1&to=${tenantEmail}&su=${subject}&body=${body}`;
+
+window.open(gmailUrl, "_blank");
+
+document.getElementById("linkResult").insertAdjacentHTML(
+  "afterbegin",
+  "<p style='color:green;font-weight:bold;'>Invite created. Gmail compose opened.</p>"
+);
+    
   } catch(error) {
     alert("Failed to create application link.");
   }
