@@ -128,6 +128,39 @@
     small {
       color: #666;
     }
+
+    .income-source-box {
+      border: 1px solid #ddd;
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+
+    .income-source-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .income-source-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .income-amount-box {
+      display: none;
+      margin-left: 28px;
+      margin-top: 8px;
+    }
+
+    .required-note {
+      color: #c62828;
+      font-weight: bold;
+      font-size: 14px;
+      margin-top: 8px;
+    }
   </style>
 </head>
 
@@ -245,8 +278,16 @@
       <label>I authorize credit check, background check, rental verification, employment verification, and income verification.</label>
     </div>
 
-    <label>Upload Credit Report from Credit Karma or Similar</label>
-    <input type="file" name="Credit Report Upload" accept="image/*,.pdf">
+    <div class="disclaimer">
+      <strong>Credit Report Upload Required</strong>
+      <br><br>
+      Please upload a recent credit report PDF or clear screenshots from Credit Karma, Experian, Equifax, TransUnion, or AnnualCreditReport.com.
+      <br><br>
+      The report must show the applicant name and should be dated within the last 30 days. Providing this may help avoid a separate credit/background screening fee of approximately $50.
+    </div>
+
+    <label>Upload Credit Report PDF or Screenshots</label>
+    <input type="file" name="Credit Report Upload" accept="image/*,.pdf" required>
 
     <label>Additional Information</label>
     <textarea name="Additional Information" rows="4"></textarea>
@@ -361,28 +402,60 @@ function createNameFields(prefix, required = true) {
   `;
 }
 
-function incomeSourceOptions() {
+function incomeSourceChecklist(group, number, labelPrefix) {
+  const groupKey = group + number;
+
   return `
-    <option value="">Select</option>
-    <option>No Income</option>
-    <option>Employment</option>
-    <option>Self Employed</option>
-    <option>Unemployment</option>
-    <option>Retirement</option>
-    <option>Pension</option>
-    <option>Social Security</option>
-    <option>Disability</option>
-    <option>Child Support</option>
-    <option>Alimony</option>
-    <option>Investments</option>
-    <option>Military Benefits</option>
-    <option>Section 8 / Housing Assistance</option>
-    <option>Student Financial Aid</option>
-    <option>Savings</option>
-    <option>Family Support</option>
-    <option>Rental Income</option>
-    <option>Business Income</option>
-    <option>Other</option>
+    <div class="income-source-box">
+      <p class="required-note">
+        Select all income sources that apply. For every selected source, enter the monthly amount.
+      </p>
+
+      ${incomeSourceRow(group, number, labelPrefix, "Employed")}
+      ${incomeSourceRow(group, number, labelPrefix, "Unemployed")}
+      ${incomeSourceRow(group, number, labelPrefix, "Disability")}
+      ${incomeSourceRow(group, number, labelPrefix, "Social Security")}
+
+      <div id="${group}IncomeDetails${number}" style="display:none;">
+        <label>Upload Proof of Income</label>
+        <input 
+          type="file" 
+          id="${group}Proof${number}" 
+          name="${labelPrefix} Proof of Income" 
+          accept="image/*,.pdf"
+        >
+      </div>
+    </div>
+  `;
+}
+
+function incomeSourceRow(group, number, labelPrefix, source) {
+  const clean = source.replace(/\s+/g, "");
+  const amountId = `${group}IncomeAmount${number}${clean}`;
+
+  return `
+    <div class="income-source-row">
+      <input
+        type="checkbox"
+        name="${labelPrefix} Income Source"
+        value="${source}"
+        data-income-group="${group}${number}"
+        data-amount-id="${amountId}"
+        onchange="toggleIncomeSource('${group}', ${number})"
+      >
+      <label style="margin-top:0;">${source}</label>
+    </div>
+
+    <div class="income-amount-box" id="${amountId}Box">
+      <label>${source} Monthly Income Amount</label>
+      <input
+        type="number"
+        id="${amountId}"
+        name="${labelPrefix} ${source} Monthly Income"
+        min="0"
+        step="0.01"
+      >
+    </div>
   `;
 }
 
@@ -475,29 +548,19 @@ function createApplicantFields(number, askRelationship) {
       <input type="file" name="Applicant ${number} Photo ID" accept="image/*,.pdf" required>
 
       <label>Source of Income</label>
-      <select name="Applicant ${number} Source of Income" onchange="toggleIncomeInfo(this, ${number})" required>
-        ${incomeSourceOptions()}
-      </select>
+      ${incomeSourceChecklist("applicant", number, "Applicant " + number)}
 
-      <div id="incomeInfo${number}" style="display:none;">
-        <label>Employer / Income Source Name</label>
-        <input type="text" name="Applicant ${number} Employer or Income Source Name">
+      <label>Employer / Income Source Name</label>
+      <input type="text" name="Applicant ${number} Employer or Income Source Name">
 
-        <label>Employer / Source Phone</label>
-        <input type="tel" name="Applicant ${number} Employer or Source Phone">
+      <label>Employer / Source Phone</label>
+      <input type="tel" name="Applicant ${number} Employer or Source Phone">
 
-        <label>Job Position / Income Description</label>
-        <input type="text" name="Applicant ${number} Job Position or Income Description">
+      <label>Job Position / Income Description</label>
+      <input type="text" name="Applicant ${number} Job Position or Income Description">
 
-        <label>Monthly Income</label>
-        <input type="text" name="Applicant ${number} Monthly Income">
-
-        <label>How long have you received this income?</label>
-        <input type="text" name="Applicant ${number} Income Length">
-
-        <label>Upload Proof of Income</label>
-        <input type="file" name="Applicant ${number} Proof of Income" accept="image/*,.pdf">
-      </div>
+      <label>How long have you received this income?</label>
+      <input type="text" name="Applicant ${number} Income Length">
 
     </div>
   `;
@@ -540,26 +603,16 @@ function createOccupantFields() {
           <input type="file" name="Additional Occupant ${i} Photo ID" accept="image/*,.pdf">
 
           <label>Source of Income</label>
-          <select name="Additional Occupant ${i} Source of Income" onchange="toggleOtherOccupantIncome(this, ${i})">
-            ${incomeSourceOptions()}
-          </select>
+          ${incomeSourceChecklist("occupant", i, "Additional Occupant " + i)}
 
-          <div id="otherIncomeInfo${i}" style="display:none;">
-            <label>Employer / Income Source Name</label>
-            <input type="text" name="Additional Occupant ${i} Employer or Income Source Name">
+          <label>Employer / Income Source Name</label>
+          <input type="text" name="Additional Occupant ${i} Employer or Income Source Name">
 
-            <label>Employer / Source Phone</label>
-            <input type="tel" name="Additional Occupant ${i} Employer or Source Phone">
+          <label>Employer / Source Phone</label>
+          <input type="tel" name="Additional Occupant ${i} Employer or Source Phone">
 
-            <label>Monthly Income</label>
-            <input type="text" name="Additional Occupant ${i} Monthly Income">
-
-            <label>How long have you received this income?</label>
-            <input type="text" name="Additional Occupant ${i} Income Length">
-
-            <label>Upload Proof of Income</label>
-            <input type="file" name="Additional Occupant ${i} Proof of Income" accept="image/*,.pdf">
-          </div>
+          <label>How long have you received this income?</label>
+          <input type="text" name="Additional Occupant ${i} Income Length">
 
         </div>
 
@@ -648,17 +701,67 @@ function checkEmailMatch(number) {
   }
 }
 
-function toggleIncomeInfo(select, number) {
-  const section = document.getElementById("incomeInfo" + number);
-  const proofInput = section.querySelector('input[type="file"]');
+function toggleIncomeSource(group, number) {
+  const checkboxes = document.querySelectorAll(
+    `input[data-income-group="${group}${number}"]`
+  );
 
-  if (select.value !== "" && select.value !== "No Income") {
-    section.style.display = "block";
-    proofInput.required = true;
-  } else {
-    section.style.display = "none";
-    proofInput.required = false;
+  let anyChecked = false;
+
+  checkboxes.forEach(checkbox => {
+    const amountId = checkbox.dataset.amountId;
+    const amountInput = document.getElementById(amountId);
+    const amountBox = document.getElementById(amountId + "Box");
+
+    if (checkbox.checked) {
+      anyChecked = true;
+      amountBox.style.display = "block";
+      amountInput.required = true;
+    } else {
+      amountBox.style.display = "none";
+      amountInput.required = false;
+      amountInput.value = "";
+    }
+  });
+
+  const details = document.getElementById(group + "IncomeDetails" + number);
+  const proof = document.getElementById(group + "Proof" + number);
+
+  if (details && proof) {
+    if (anyChecked) {
+      details.style.display = "block";
+      proof.required = true;
+    } else {
+      details.style.display = "none";
+      proof.required = false;
+      proof.value = "";
+    }
   }
+}
+
+function validateIncomeSelection(group, number, label) {
+  const checkboxes = document.querySelectorAll(
+    `input[data-income-group="${group}${number}"]`
+  );
+
+  const checked = Array.from(checkboxes).filter(box => box.checked);
+
+  if (checked.length === 0) {
+    alert("Please select at least one income source for " + label);
+    return false;
+  }
+
+  for (const checkbox of checked) {
+    const amountInput = document.getElementById(checkbox.dataset.amountId);
+
+    if (!amountInput.value || Number(amountInput.value) < 0) {
+      alert("Please enter monthly income amount for " + checkbox.value + " for " + label);
+      amountInput.focus();
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function toggleRelationshipInfo(select, number) {
@@ -682,18 +785,6 @@ function toggleAdultChildInfo(select, number) {
   }
 }
 
-function toggleOtherOccupantIncome(select, number) {
-  const section = document.getElementById("otherIncomeInfo" + number);
-  const proofInput = section.querySelector('input[type="file"]');
-
-  if (select.value !== "" && select.value !== "No Income") {
-    section.style.display = "block";
-    proofInput.required = true;
-  } else {
-    section.style.display = "none";
-    proofInput.required = false;
-  }
-}
 
 function toggleEvictionInfo(select) {
   const section = document.getElementById("evictionInfo");
@@ -737,6 +828,10 @@ function validateForm() {
       retypeEmail.style.border = "2px solid red";
       emailError.style.display = "block";
       alert("Emails do not match for Applicant " + i);
+      return false;
+    }
+
+    if (!validateIncomeSelection("applicant", i, "Applicant " + i)) {
       return false;
     }
   }
