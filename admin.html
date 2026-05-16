@@ -51,9 +51,17 @@
       font-size:15px;
     }
 
-    .danger{background:#c62828;}
-    .gray{background:#777;}
-    .green{background:#2e7d32;}
+    .danger{
+      background:#c62828;
+    }
+
+    .gray{
+      background:#777;
+    }
+
+    .green{
+      background:#2e7d32;
+    }
 
     .row{
       display:grid;
@@ -69,7 +77,9 @@
       margin-top:15px;
     }
 
-    .hidden{display:none;}
+    .hidden{
+      display:none;
+    }
 
     .result{
       background:#f1f1f1;
@@ -120,6 +130,9 @@
 
     <button onclick="showAddProperty()">Add New Property</button>
     <button class="gray" onclick="loadProperties()">Refresh Properties</button>
+    <button class="danger" onclick="logout()">Logout / Forget Password</button>
+
+    <div id="topStatusMessage"></div>
   </div>
 
   <div class="box hidden" id="propertyFormBox">
@@ -254,14 +267,17 @@
 </div>
 
 <script>
+const API_BASE = "https://rentapp-0jgt.onrender.com";
+
+let adminPassword = "";
+let properties = [];
+let lastGeneratedLink = "";
 
 window.onload = function(){
-
   const savedPassword =
     localStorage.getItem("rentapp_admin_password");
 
   if(savedPassword){
-
     document.getElementById("adminPassword").value =
       savedPassword;
 
@@ -272,21 +288,14 @@ window.onload = function(){
 
     loadProperties();
   }
-}
-  
-const API_BASE = "https://rentapp-0jgt.onrender.com";
-
-let adminPassword = "";
-let properties = [];
-let lastGeneratedLink = "";
+};
 
 function login(){
-
   adminPassword =
     document.getElementById("adminPassword").value;
 
   if(!adminPassword){
-    showStatus("Enter password", "error");
+    showTopStatus("Enter password", "error");
     return;
   }
 
@@ -299,6 +308,18 @@ function login(){
   document.getElementById("adminArea").classList.remove("hidden");
 
   loadProperties();
+}
+
+function logout(){
+  localStorage.removeItem("rentapp_admin_password");
+
+  adminPassword = "";
+  properties = [];
+  lastGeneratedLink = "";
+
+  document.getElementById("adminPassword").value = "";
+  document.getElementById("adminArea").classList.add("hidden");
+  document.getElementById("loginBox").classList.remove("hidden");
 }
 
 async function api(path, options = {}){
@@ -331,9 +352,23 @@ function showStatus(message, type){
     `<p class="${type === "error" ? "error-message" : "success-message"}">${message}</p>`;
 }
 
+function showTopStatus(message, type){
+  const box = document.getElementById("topStatusMessage");
+
+  if(!box){
+    return;
+  }
+
+  box.innerHTML =
+    `<p class="${type === "error" ? "error-message" : "success-message"}">${message}</p>`;
+}
+
 function togglePetDeposit(){
-  const petsAllowed = document.getElementById("defaultPetsAllowed").value;
-  const box = document.getElementById("petDepositBox");
+  const petsAllowed =
+    document.getElementById("defaultPetsAllowed").value;
+
+  const box =
+    document.getElementById("petDepositBox");
 
   if(petsAllowed === "No"){
     box.style.display = "none";
@@ -344,8 +379,11 @@ function togglePetDeposit(){
 }
 
 function toggleAppPetDeposit(){
-  const petsAllowed = document.getElementById("appPetsAllowed").value;
-  const box = document.getElementById("appPetDepositBox");
+  const petsAllowed =
+    document.getElementById("appPetsAllowed").value;
+
+  const box =
+    document.getElementById("appPetDepositBox");
 
   if(petsAllowed === "No"){
     box.style.display = "none";
@@ -379,28 +417,41 @@ function cancelPropertyForm(){
 async function loadProperties(){
   try{
     const data = await api("/api/properties");
+
     properties = data.properties || [];
+
     renderPropertyDropdown();
+
+    showTopStatus("Properties loaded.", "success");
   }catch(error){
-    showStatus("Could not load properties. Check admin password or backend.", "error");
+    showTopStatus("Could not load properties. Check password or backend.", "error");
   }
 }
 
 function renderPropertyDropdown(){
-  const dropdown = document.getElementById("propertyDropdown");
+  const dropdown =
+    document.getElementById("propertyDropdown");
 
-  dropdown.innerHTML = `<option value="">Select property</option>`;
+  dropdown.innerHTML =
+    `<option value="">Select property</option>`;
 
   properties.forEach(property => {
-    const option = document.createElement("option");
-    option.value = property.id;
-    option.textContent = `${property.propertyName || "No Name"} - ${property.address || ""}`;
+    const option =
+      document.createElement("option");
+
+    option.value =
+      property.id;
+
+    option.textContent =
+      `${property.propertyName || "No Name"} - ${property.address || ""}`;
+
     dropdown.appendChild(option);
   });
 }
 
 function choosePropertyFromDropdown(){
-  const id = document.getElementById("propertyDropdown").value;
+  const id =
+    document.getElementById("propertyDropdown").value;
 
   if(!id){
     document.getElementById("selectedPropertyPreview").classList.add("hidden");
@@ -412,22 +463,42 @@ function choosePropertyFromDropdown(){
 }
 
 async function saveProperty(){
-  const id = document.getElementById("propertyId").value;
-  const petsAllowed = document.getElementById("defaultPetsAllowed").value;
+  const id =
+    document.getElementById("propertyId").value;
+
+  const petsAllowed =
+    document.getElementById("defaultPetsAllowed").value;
 
   const body = {
-    propertyName: document.getElementById("propertyName").value,
-    address: document.getElementById("address").value,
-    defaultRent: document.getElementById("defaultRent").value,
-    defaultDeposit: document.getElementById("defaultDeposit").value,
-    defaultAvailableDate: document.getElementById("defaultAvailableDate").value,
-    defaultPetsAllowed: petsAllowed,
-    defaultPetDeposit: petsAllowed === "No" ? "" : document.getElementById("defaultPetDeposit").value,
-    notes: document.getElementById("notes").value
+    propertyName:
+      document.getElementById("propertyName").value,
+
+    address:
+      document.getElementById("address").value,
+
+    defaultRent:
+      document.getElementById("defaultRent").value,
+
+    defaultDeposit:
+      document.getElementById("defaultDeposit").value,
+
+    defaultAvailableDate:
+      document.getElementById("defaultAvailableDate").value,
+
+    defaultPetsAllowed:
+      petsAllowed,
+
+    defaultPetDeposit:
+      petsAllowed === "No"
+        ? ""
+        : document.getElementById("defaultPetDeposit").value,
+
+    notes:
+      document.getElementById("notes").value
   };
 
   if(!body.propertyName){
-    showStatus("Property name required", "error");
+    showTopStatus("Property name required", "error");
     return;
   }
 
@@ -445,22 +516,26 @@ async function saveProperty(){
     }
 
     cancelPropertyForm();
+
     await loadProperties();
-    showStatus("Property saved.", "success");
+
+    showTopStatus("Property saved.", "success");
   }catch(error){
-    showStatus("Failed to save property.", "error");
+    showTopStatus("Failed to save property.", "error");
   }
 }
 
 function editPropertyFromSelected(){
-  const id = document.getElementById("propertyDropdown").value;
+  const id =
+    document.getElementById("propertyDropdown").value;
 
   if(!id){
-    showStatus("Select a property first.", "error");
+    showTopStatus("Select a property first.", "error");
     return;
   }
 
-  const property = properties.find(p => p.id === id);
+  const property =
+    properties.find(p => p.id === id);
 
   if(!property){
     return;
@@ -469,24 +544,42 @@ function editPropertyFromSelected(){
   document.getElementById("propertyFormBox").classList.remove("hidden");
   document.getElementById("propertyFormTitle").innerText = "Edit Property";
 
-  document.getElementById("propertyId").value = property.id;
-  document.getElementById("propertyName").value = property.propertyName || "";
-  document.getElementById("address").value = property.address || "";
-  document.getElementById("defaultRent").value = property.defaultRent || "";
-  document.getElementById("defaultDeposit").value = property.defaultDeposit || "";
-  document.getElementById("defaultAvailableDate").value = property.defaultAvailableDate || "";
-  document.getElementById("defaultPetsAllowed").value = property.defaultPetsAllowed || "No";
-  document.getElementById("defaultPetDeposit").value = property.defaultPetDeposit || "";
-  document.getElementById("notes").value = property.notes || "";
+  document.getElementById("propertyId").value =
+    property.id;
+
+  document.getElementById("propertyName").value =
+    property.propertyName || "";
+
+  document.getElementById("address").value =
+    property.address || "";
+
+  document.getElementById("defaultRent").value =
+    property.defaultRent || "";
+
+  document.getElementById("defaultDeposit").value =
+    property.defaultDeposit || "";
+
+  document.getElementById("defaultAvailableDate").value =
+    property.defaultAvailableDate || "";
+
+  document.getElementById("defaultPetsAllowed").value =
+    property.defaultPetsAllowed || "No";
+
+  document.getElementById("defaultPetDeposit").value =
+    property.defaultPetDeposit || "";
+
+  document.getElementById("notes").value =
+    property.notes || "";
 
   togglePetDeposit();
 }
 
 async function deleteSelectedProperty(){
-  const id = document.getElementById("propertyDropdown").value;
+  const id =
+    document.getElementById("propertyDropdown").value;
 
   if(!id){
-    showStatus("Select a property first.", "error");
+    showTopStatus("Select a property first.", "error");
     return;
   }
 
@@ -503,32 +596,52 @@ async function deleteSelectedProperty(){
     document.getElementById("tenantBox").classList.add("hidden");
 
     await loadProperties();
-    showStatus("Property deleted.", "success");
+
+    showTopStatus("Property deleted.", "success");
   }catch(error){
-    showStatus("Failed to delete property.", "error");
+    showTopStatus("Failed to delete property.", "error");
   }
 }
 
 function selectProperty(id){
-  const property = properties.find(p => p.id === id);
+  const property =
+    properties.find(p => p.id === id);
 
-  if(!property) return;
+  if(!property){
+    return;
+  }
 
-  document.getElementById("propertyDropdown").value = id;
+  document.getElementById("propertyDropdown").value =
+    id;
+
   document.getElementById("tenantBox").classList.remove("hidden");
 
-  document.getElementById("selectedPropertyId").value = property.id;
-  document.getElementById("selectedPropertyName").value = property.propertyName || "";
-  document.getElementById("appRent").value = property.defaultRent || "";
-  document.getElementById("appDeposit").value = property.defaultDeposit || "";
-  document.getElementById("appAvailableDate").value = property.defaultAvailableDate || "";
-  document.getElementById("appNotes").value = property.notes || "";
+  document.getElementById("selectedPropertyId").value =
+    property.id;
+
+  document.getElementById("selectedPropertyName").value =
+    property.propertyName || "";
+
+  document.getElementById("appRent").value =
+    property.defaultRent || "";
+
+  document.getElementById("appDeposit").value =
+    property.defaultDeposit || "";
+
+  document.getElementById("appAvailableDate").value =
+    property.defaultAvailableDate || "";
+
+  document.getElementById("appNotes").value =
+    property.notes || "";
+
   document.getElementById("tenantEmail").value = "";
+
   document.getElementById("linkResult").classList.add("hidden");
   document.getElementById("inviteButton").classList.add("hidden");
   document.getElementById("statusMessage").innerHTML = "";
 
-  const preview = document.getElementById("selectedPropertyPreview");
+  const preview =
+    document.getElementById("selectedPropertyPreview");
 
   preview.innerHTML = `
     <h3>Selected Property</h3>
@@ -556,37 +669,67 @@ function selectProperty(id){
     toggleAppPetDeposit();
   }
 
-  document.getElementById("tenantBox").scrollIntoView({ behavior:"smooth" });
+  document.getElementById("tenantBox").scrollIntoView({
+    behavior:"smooth"
+  });
 }
 
 async function createApplicationLink(event){
-  const button = event.target;
+  const button =
+    event.target;
 
-  const propertyId = document.getElementById("selectedPropertyId").value;
-  const property = properties.find(p => p.id === propertyId);
+  const propertyId =
+    document.getElementById("selectedPropertyId").value;
+
+  const property =
+    properties.find(p => p.id === propertyId);
 
   if(!property){
     showStatus("Select property first.", "error");
     return;
   }
 
-  const tenantEmail = document.getElementById("tenantEmail").value;
-  const petsAllowed = property.defaultPetsAllowed || "No";
+  const tenantEmail =
+    document.getElementById("tenantEmail").value;
+
+  const petsAllowed =
+    property.defaultPetsAllowed || "No";
 
   const body = {
-    propertyId: property.id,
-    propertyName: property.propertyName,
-    address: property.address,
-    tenantEmail: tenantEmail,
-    rent: document.getElementById("appRent").value,
-    availableDate: property.defaultAvailableDate || "",
-    deposit: document.getElementById("appDeposit").value,
-    petsAllowed: petsAllowed,
-    petDeposit: petsAllowed === "No" ? "" : document.getElementById("appPetDeposit").value,
-    notes: document.getElementById("appNotes").value
+    propertyId:
+      property.id,
+
+    propertyName:
+      property.propertyName,
+
+    address:
+      property.address,
+
+    tenantEmail:
+      tenantEmail,
+
+    rent:
+      document.getElementById("appRent").value,
+
+    availableDate:
+      property.defaultAvailableDate || "",
+
+    deposit:
+      document.getElementById("appDeposit").value,
+
+    petsAllowed:
+      petsAllowed,
+
+    petDeposit:
+      petsAllowed === "No"
+        ? ""
+        : document.getElementById("appPetDeposit").value,
+
+    notes:
+      document.getElementById("appNotes").value
   };
 
-  try {
+  try{
     button.disabled = true;
     button.innerText = "Generating...";
 
@@ -595,14 +738,17 @@ async function createApplicationLink(event){
       body:JSON.stringify(body)
     });
 
-    const application = data.application;
+    const application =
+      data.application;
 
     lastGeneratedLink =
       "https://oceanvacationsmb.github.io/rentapp/apply.html?code=" +
       application.code;
 
     document.getElementById("linkResult").classList.remove("hidden");
-    document.getElementById("generatedCode").innerText = application.code;
+
+    document.getElementById("generatedCode").innerText =
+      application.code;
 
     document.getElementById("generatedLink").innerHTML =
       `<a href="${lastGeneratedLink}" target="_blank">${lastGeneratedLink}</a>`;
@@ -645,7 +791,7 @@ ${petText}Thank you`;
 
     showStatus("Message generated. Click Invite To Apply to open Gmail.", "success");
 
-  } catch(error) {
+  }catch(error){
     showStatus("Failed to create application link.", "error");
   }
 
@@ -654,18 +800,21 @@ ${petText}Thank you`;
 }
 
 function openGmailInvite(){
-  const tenantEmail = document.getElementById("tenantEmail").value;
+  const tenantEmail =
+    document.getElementById("tenantEmail").value;
 
   if(!tenantEmail){
     showStatus("Tenant email is required before opening Gmail.", "error");
     return;
   }
 
-  const subject = encodeURIComponent("Rental Application");
+  const subject =
+    encodeURIComponent("Rental Application");
 
-  const body = encodeURIComponent(
-    document.getElementById("tenantMessage").value
-  );
+  const body =
+    encodeURIComponent(
+      document.getElementById("tenantMessage").value
+    );
 
   const gmailUrl =
     `https://mail.google.com/mail/?view=cm&fs=1&to=${tenantEmail}&su=${subject}&body=${body}`;
@@ -681,7 +830,9 @@ function copyLink(){
 }
 
 function copyMessage(){
-  const message = document.getElementById("tenantMessage").value;
+  const message =
+    document.getElementById("tenantMessage").value;
+
   navigator.clipboard.writeText(message);
   showStatus("Message copied.", "success");
 }
