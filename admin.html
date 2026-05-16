@@ -1,1 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rental Application Dashboard</title>
 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+
+    body{
+      font-family:Arial;
+      background:#f4f4f4;
+      padding:20px;
+    }
+
+    .box{
+      max-width:800px;
+      margin:auto;
+      background:white;
+      padding:25px;
+      border-radius:10px;
+      box-shadow:0 0 10px #ccc;
+    }
+
+    input,select,textarea{
+      width:100%;
+      padding:12px;
+      margin-top:6px;
+      margin-bottom:15px;
+      border:1px solid #ccc;
+      border-radius:6px;
+      box-sizing:border-box;
+    }
+
+    button{
+      width:100%;
+      padding:15px;
+      background:#0077cc;
+      color:white;
+      border:none;
+      border-radius:6px;
+      font-size:18px;
+      cursor:pointer;
+    }
+
+    .result{
+      margin-top:25px;
+      background:#f1f1f1;
+      padding:15px;
+      border-radius:6px;
+      word-break:break-word;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+  <h2>Create Rental Application</h2>
+
+  <label>Property Name / Address</label>
+  <input type="text" id="property">
+
+  <label>Monthly Rent</label>
+  <input type="text" id="rent">
+
+  <label>Available Date</label>
+  <input type="date" id="availableDate">
+
+  <label>Security Deposit</label>
+  <input type="text" id="deposit">
+
+  <label>Application Fee</label>
+  <input type="text" id="applicationFee">
+
+  <label>Pets Allowed</label>
+  <select id="petsAllowed">
+    <option>Yes</option>
+    <option>No</option>
+    <option>Subject To Approval</option>
+  </select>
+
+  <label>Pet Deposit</label>
+  <input type="text" id="petDeposit">
+
+  <label>Additional Notes</label>
+  <textarea id="notes" rows="4"></textarea>
+
+  <button onclick="generateCode()">
+    Generate Application Link
+  </button>
+
+  <div class="result" id="resultBox" style="display:none;">
+
+    <h3>Application Created</h3>
+
+    <div id="generatedCode"></div>
+
+    <br>
+
+    <div id="generatedLink"></div>
+
+  </div>
+
+</div>
+
+<script>
+
+function generateCode(){
+
+  const property =
+    document.getElementById("property").value;
+
+  const rent =
+    document.getElementById("rent").value;
+
+  const availableDate =
+    document.getElementById("availableDate").value;
+
+  const deposit =
+    document.getElementById("deposit").value;
+
+  const applicationFee =
+    document.getElementById("applicationFee").value;
+
+  const petsAllowed =
+    document.getElementById("petsAllowed").value;
+
+  const petDeposit =
+    document.getElementById("petDeposit").value;
+
+  const notes =
+    document.getElementById("notes").value;
+
+  const code =
+    "OV-" +
+    Math.random().toString(36).substring(2,8).toUpperCase();
+
+  const applicationData = {
+
+    property,
+    rent,
+    availableDate,
+    deposit,
+    applicationFee,
+    petsAllowed,
+    petDeposit,
+    notes,
+    code
+
+  };
+
+  localStorage.setItem(
+    code,
+    JSON.stringify(applicationData)
+  );
+
+  const link =
+    window.location.origin +
+    "/apply.html?code=" +
+    code;
+
+  document.getElementById("resultBox").style.display = "block";
+
+  document.getElementById("generatedCode").innerHTML =
+    "<b>Application Code:</b><br>" + code;
+
+  document.getElementById("generatedLink").innerHTML =
+    "<b>Application Link:</b><br><a href='" +
+    link +
+    "' target='_blank'>" +
+    link +
+    "</a>";
+}
+
+</script>
+
+</body>
+</html>
