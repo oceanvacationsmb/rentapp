@@ -339,13 +339,17 @@ function createApplicantFields(number, askRelationship) {
 
         <label>Retype Social Security Number</label>
 
-        <input
-          type="password"
-          id="retypeSsn${number}"
-          name="Applicant ${number} Retype SSN"
-          placeholder="Retype SSN"
-          autocomplete="off"
-        >
+<input
+  type="text"
+  id="retypeSsn${number}"
+  name="Applicant ${number} Retype SSN"
+  placeholder="Retype SSN"
+  autocomplete="off"
+  maxlength="11"
+  oninput="formatSSN(this)"
+  onblur="maskSSN(this)"
+  onfocus="unmaskSSN(this)"
+>
 
         <label>Date of Birth</label>
         <input type="date" name="Applicant ${number} Date of Birth">
@@ -639,7 +643,17 @@ function validateForm() {
     const retypeEmail =
       document.getElementById("retypeEmail" + i);
 
-    if (ssn && retypeSsn && ssn.value !== retypeSsn.value) {
+    const realSSN =
+      ssn.dataset.realValue
+        ? ssn.dataset.realValue
+        : ssn.value.replace(/\D/g, "");
+
+    const realRetypeSSN =
+      retypeSsn.dataset.realValue
+        ? retypeSsn.dataset.realValue
+        : retypeSsn.value.replace(/\D/g, "");
+
+    if (realSSN !== realRetypeSSN) {
 
       alert(
         "Social Security Numbers do not match for Applicant " + i
@@ -648,7 +662,11 @@ function validateForm() {
       return false;
     }
 
-    if (email && retypeEmail && email.value !== retypeEmail.value) {
+    if (
+      email &&
+      retypeEmail &&
+      email.value !== retypeEmail.value
+    ) {
 
       alert(
         "Emails do not match for Applicant " + i
