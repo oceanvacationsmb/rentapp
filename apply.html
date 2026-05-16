@@ -157,7 +157,6 @@
     <input type="hidden" id="rentHidden" name="rent">
     <input type="hidden" id="availableDateHidden" name="availableDate">
     <input type="hidden" id="depositHidden" name="deposit">
-    <input type="hidden" id="applicationFeeHidden" name="applicationFee">
     <input type="hidden" id="petsAllowedHidden" name="petsAllowed">
     <input type="hidden" id="petDepositHidden" name="petDeposit">
     <input type="hidden" id="notesHidden" name="notes">
@@ -170,7 +169,6 @@
       <p><b>Rent:</b> $<span id="showRent"></span></p>
       <p><b>Available Date:</b> <span id="showAvailableDate"></span></p>
       <p><b>Security Deposit:</b> $<span id="showDeposit"></span></p>
-      <p><b>Application Fee:</b> $<span id="showApplicationFee"></span></p>
       <p><b>Pets:</b> <span id="showPetsAllowed"></span></p>
       <p><b>Pet Deposit / Pet Rent:</b> <span id="showPetDeposit"></span></p>
       <p><b>Notes:</b> <span id="showNotes"></span></p>
@@ -321,7 +319,6 @@ function fillApplicationInfo(app) {
   document.getElementById("rentHidden").value = app.rent || "";
   document.getElementById("availableDateHidden").value = app.availableDate || "";
   document.getElementById("depositHidden").value = app.deposit || "";
-  document.getElementById("applicationFeeHidden").value = app.applicationFee || "";
   document.getElementById("petsAllowedHidden").value = app.petsAllowed || "";
   document.getElementById("petDepositHidden").value = app.petDeposit || "";
   document.getElementById("notesHidden").value = app.notes || "";
@@ -331,7 +328,6 @@ function fillApplicationInfo(app) {
   document.getElementById("showRent").innerText = app.rent || "";
   document.getElementById("showAvailableDate").innerText = app.availableDate || "";
   document.getElementById("showDeposit").innerText = app.deposit || "";
-  document.getElementById("showApplicationFee").innerText = app.applicationFee || "";
   document.getElementById("showPetsAllowed").innerText = app.petsAllowed || "";
   document.getElementById("showPetDeposit").innerText = app.petDeposit || "N/A";
   document.getElementById("showNotes").innerText = app.notes || "N/A";
