@@ -230,7 +230,7 @@
     <label>Notes</label>
     <textarea id="appNotes" rows="4"></textarea>
 
-    <button class="green" onclick="createApplicationLink()">Send Email Invite / Generate Link</button>
+    <button class="green" onclick="createApplicationLink(event)">Send Email Invite / Generate Link</button>
 
     <div class="result hidden" id="linkResult">
       <h3>Application Link Created</h3>
@@ -516,7 +516,7 @@ function selectProperty(id){
   document.getElementById("tenantBox").scrollIntoView({ behavior:"smooth" });
 }
 
-async function createApplicationLink(){
+async function createApplicationLink(event){
   const propertyId = document.getElementById("selectedPropertyId").value;
   const property = properties.find(p => p.id === propertyId);
 
@@ -547,27 +547,32 @@ async function createApplicationLink(){
     notes: document.getElementById("appNotes").value
   };
 
-  const data = await api("/api/application-links", {
-    method:"POST",
-    body:JSON.stringify(body)
-  });
+  try {
+    const button = event.target;
+    button.disabled = true;
+    button.innerText = "Sending...";
 
-  const application = data.application;
+    const data = await api("/api/application-links", {
+      method:"POST",
+      body:JSON.stringify(body)
+    });
 
-  lastGeneratedLink =
-    "https://oceanvacationsmb.github.io/rentapp/apply.html?code=" +
-    application.code;
+    const application = data.application;
 
-  document.getElementById("linkResult").classList.remove("hidden");
-  document.getElementById("generatedCode").innerText = application.code;
+    lastGeneratedLink =
+      "https://oceanvacationsmb.github.io/rentapp/apply.html?code=" +
+      application.code;
 
-  document.getElementById("generatedLink").innerHTML =
-    `<a href="${lastGeneratedLink}" target="_blank">${lastGeneratedLink}</a>`;
+    document.getElementById("linkResult").classList.remove("hidden");
+    document.getElementById("generatedCode").innerText = application.code;
 
-  let petText = "";
+    document.getElementById("generatedLink").innerHTML =
+      `<a href="${lastGeneratedLink}" target="_blank">${lastGeneratedLink}</a>`;
 
-  if(application.petsAllowed !== "No"){
-    petText =
+    let petText = "";
+
+    if(application.petsAllowed !== "No"){
+      petText =
 `Pets:
 ${application.petsAllowed}
 
@@ -575,9 +580,9 @@ Pet Deposit / Pet Rent:
 ${application.petDeposit || "N/A"}
 
 `;
-  }
+    }
 
-  document.getElementById("tenantMessage").value =
+    document.getElementById("tenantMessage").value =
 `Hi,
 
 Please complete the rental application using this link:
@@ -601,7 +606,18 @@ $${application.deposit}
 
 ${petText}Thank you`;
 
-  alert("Application link created. If Gmail is configured correctly, the invite was emailed to the tenant.");
+    alert("Application link created and email invite sent if Gmail is configured correctly.");
+
+    button.disabled = false;
+    button.innerText = "Send Email Invite / Generate Link";
+
+  } catch(error) {
+    alert("Something failed. Check Render logs or Gmail settings.");
+
+    const button = event.target;
+    button.disabled = false;
+    button.innerText = "Send Email Invite / Generate Link";
+  }
 }
 
 function copyLink(){
