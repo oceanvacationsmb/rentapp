@@ -229,14 +229,26 @@ function handleApplicationType() {
   }
 }
 
+function nameFields(prefix, required = true) {
+  return `
+    <label>First Name</label>
+    <input type="text" name="${prefix} First Name" ${required ? "required" : ""}>
+
+    <label>Middle Name</label>
+    <input type="text" name="${prefix} Middle Name">
+
+    <label>Last Name</label>
+    <input type="text" name="${prefix} Last Name" ${required ? "required" : ""}>
+  `;
+}
+
 function createApplicantFields(number, askRelationship) {
   return `
     <div class="section-box">
 
       <h3>Applicant ${number}</h3>
 
-      <label>Full Name</label>
-      <input type="text" name="Applicant ${number} Full Name" required>
+      ${nameFields("Applicant " + number, true)}
 
       ${askRelationship ? `
         <label>Relationship to Main Applicant</label>
@@ -277,7 +289,7 @@ function createApplicantFields(number, askRelationship) {
         <input type="hidden" id="ssnLast4${number}" name="Applicant ${number} SSN Last 4">
 
         <div class="last4" id="last4Display${number}">
-          Last 4: 
+          Last 4:
         </div>
 
         <label>Retype Social Security Number</label>
@@ -379,8 +391,7 @@ function createOccupantFields() {
 
         <h3>Other Occupant ${i}</h3>
 
-        <label>Full Name</label>
-        <input type="text" name="Other Occupant ${i} Full Name">
+        ${nameFields("Other Occupant " + i, false)}
 
         <label>Adult or Child</label>
         <select name="Other Occupant ${i} Adult or Child" onchange="toggleAdultChildInfo(this, ${i})">
@@ -401,7 +412,7 @@ function createOccupantFields() {
 
         <div id="adultInfo${i}" style="display:none;">
 
-          <label>Will this person be signing the lease agreement?</label>
+          <label>Will this adult be signing the lease agreement?</label>
           <select name="Other Occupant ${i} Signing Lease">
             <option value="">Select</option>
             <option>No</option>
@@ -415,7 +426,7 @@ function createOccupantFields() {
             accept="image/*,.pdf"
           >
 
-          <label>Does this person have income?</label>
+          <label>Does this adult have income?</label>
           <select name="Other Occupant ${i} Has Income" onchange="toggleOtherOccupantIncome(this, ${i})">
             <option value="">Select</option>
             <option>No</option>
@@ -444,6 +455,10 @@ function createOccupantFields() {
 
         </div>
 
+        <div id="childInfo${i}" style="display:none;">
+          <small>Child occupants cannot sign the lease agreement and do not need to upload ID or income documents.</small>
+        </div>
+
       </div>
     `;
   }
@@ -452,7 +467,7 @@ function createOccupantFields() {
 function showLastFour(number) {
   const ssn = document.getElementById("ssn" + number).value.replace(/\D/g, "");
   const last4 = ssn.length >= 4 ? ssn.slice(-4) : "";
-  
+
   document.getElementById("last4Display" + number).innerText = "Last 4: " + last4;
   document.getElementById("ssnLast4" + number).value = last4;
 }
@@ -473,8 +488,19 @@ function toggleRelationshipInfo(select, number) {
 }
 
 function toggleAdultChildInfo(select, number) {
-  const section = document.getElementById("adultInfo" + number);
-  section.style.display = select.value === "Adult" ? "block" : "none";
+  const adultSection = document.getElementById("adultInfo" + number);
+  const childSection = document.getElementById("childInfo" + number);
+
+  if (select.value === "Adult") {
+    adultSection.style.display = "block";
+    childSection.style.display = "none";
+  } else if (select.value === "Child") {
+    adultSection.style.display = "none";
+    childSection.style.display = "block";
+  } else {
+    adultSection.style.display = "none";
+    childSection.style.display = "none";
+  }
 }
 
 function toggleOtherOccupantIncome(select, number) {
