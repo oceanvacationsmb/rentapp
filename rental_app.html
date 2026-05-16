@@ -195,7 +195,7 @@
     </div>
 
     <div class="checkbox-row">
-      <input type="checkbox" required>
+      <input type="checkbox" name="Credit and Background Check Authorization" value="Agreed" required>
       <label>
         I authorize credit check, background check, rental verification, employment verification, and income verification.
       </label>
@@ -249,6 +249,31 @@ function createNameFields(prefix, required = true) {
 
     <label>Last Name</label>
     <input type="text" name="${prefix} Last Name" ${required ? "required" : ""}>
+  `;
+}
+
+function incomeSourceOptions() {
+  return `
+    <option value="">Select</option>
+    <option>No Income</option>
+    <option>Employment</option>
+    <option>Self Employed</option>
+    <option>Unemployment</option>
+    <option>Retirement</option>
+    <option>Pension</option>
+    <option>Social Security</option>
+    <option>Disability</option>
+    <option>Child Support</option>
+    <option>Alimony</option>
+    <option>Investments</option>
+    <option>Military Benefits</option>
+    <option>Section 8 / Housing Assistance</option>
+    <option>Student Financial Aid</option>
+    <option>Savings</option>
+    <option>Family Support</option>
+    <option>Rental Income</option>
+    <option>Business Income</option>
+    <option>Other</option>
   `;
 }
 
@@ -355,44 +380,31 @@ function createApplicantFields(number, askRelationship) {
           accept="image/*,.pdf"
         >
 
-        <label>Does this applicant have income?</label>
+        <label>Source of Income</label>
 
         <select 
-          name="Applicant ${number} Has Income"
+          name="Applicant ${number} Source of Income"
           onchange="toggleIncomeInfo(this, ${number})"
         >
-          <option value="">Select</option>
-          <option>Yes</option>
-          <option>No</option>
+          ${incomeSourceOptions()}
         </select>
 
         <div id="incomeInfo${number}" style="display:none;">
 
-          <label>Employment Status</label>
+          <label>Employer / Income Source Name</label>
+          <input type="text" name="Applicant ${number} Employer or Income Source Name">
 
-          <select name="Applicant ${number} Employment Status">
-            <option value="">Select</option>
-            <option>Employed</option>
-            <option>Self Employed</option>
-            <option>Retired</option>
-            <option>Student</option>
-            <option>Other</option>
-          </select>
+          <label>Employer / Source Phone</label>
+          <input type="tel" name="Applicant ${number} Employer or Source Phone">
 
-          <label>Employer Name</label>
-          <input type="text" name="Applicant ${number} Employer Name">
-
-          <label>Employer Phone</label>
-          <input type="tel" name="Applicant ${number} Employer Phone">
-
-          <label>Job Position</label>
-          <input type="text" name="Applicant ${number} Job Position">
+          <label>Job Position / Income Description</label>
+          <input type="text" name="Applicant ${number} Job Position or Income Description">
 
           <label>Monthly Income</label>
           <input type="text" name="Applicant ${number} Monthly Income">
 
-          <label>How long employed?</label>
-          <input type="text" name="Applicant ${number} Employment Length">
+          <label>How long have you received this income?</label>
+          <input type="text" name="Applicant ${number} Income Length">
 
           <label>Upload Proof of Income</label>
 
@@ -460,27 +472,28 @@ function createOccupantFields() {
             accept="image/*,.pdf"
           >
 
-          <label>Does this adult have income?</label>
+          <label>Source of Income</label>
 
           <select 
-            name="Additional Occupant ${i} Has Income"
+            name="Additional Occupant ${i} Source of Income"
             onchange="toggleOtherOccupantIncome(this, ${i})"
           >
-            <option value="">Select</option>
-            <option>No</option>
-            <option>Yes</option>
+            ${incomeSourceOptions()}
           </select>
 
           <div id="otherIncomeInfo${i}" style="display:none;">
 
-            <label>Employer Name</label>
-            <input type="text" name="Additional Occupant ${i} Employer Name">
+            <label>Employer / Income Source Name</label>
+            <input type="text" name="Additional Occupant ${i} Employer or Income Source Name">
 
-            <label>Employer Phone</label>
-            <input type="tel" name="Additional Occupant ${i} Employer Phone">
+            <label>Employer / Source Phone</label>
+            <input type="tel" name="Additional Occupant ${i} Employer or Source Phone">
 
             <label>Monthly Income</label>
             <input type="text" name="Additional Occupant ${i} Monthly Income">
+
+            <label>How long have you received this income?</label>
+            <input type="text" name="Additional Occupant ${i} Income Length">
 
             <label>Upload Proof of Income</label>
 
@@ -527,8 +540,11 @@ function toggleIncomeInfo(select, number) {
 
   const section = document.getElementById("incomeInfo" + number);
 
-  section.style.display =
-    select.value === "Yes" ? "block" : "none";
+  if (select.value !== "" && select.value !== "No Income") {
+    section.style.display = "block";
+  } else {
+    section.style.display = "none";
+  }
 }
 
 function toggleRelationshipInfo(select, number) {
@@ -565,8 +581,11 @@ function toggleOtherOccupantIncome(select, number) {
 
   const section = document.getElementById("otherIncomeInfo" + number);
 
-  section.style.display =
-    select.value === "Yes" ? "block" : "none";
+  if (select.value !== "" && select.value !== "No Income") {
+    section.style.display = "block";
+  } else {
+    section.style.display = "none";
+  }
 }
 
 function toggleEvictionInfo(select) {
