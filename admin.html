@@ -59,6 +59,10 @@
       background:#777;
     }
 
+    .green{
+      background:#2e7d32;
+    }
+
     .row{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -86,6 +90,12 @@
 
     textarea.message{
       height:180px;
+    }
+
+    @media(max-width:700px){
+      .row{
+        grid-template-columns:1fr;
+      }
     }
   </style>
 </head>
@@ -162,12 +172,23 @@
   </div>
 
   <div class="box">
-    <h3>Properties</h3>
+    <h3>Choose Saved Property From Dropbox</h3>
+
+    <label>Property</label>
+    <select id="propertyDropdown" onchange="choosePropertyFromDropdown()">
+      <option value="">Select property</option>
+    </select>
+
+    <div id="selectedPropertyPreview" class="card hidden"></div>
+  </div>
+
+  <div class="box">
+    <h3>Saved Properties</h3>
     <div id="propertiesList"></div>
   </div>
 
-  <div class="box hidden" id="applicationBox">
-    <h3>Create Application Link</h3>
+  <div class="box hidden" id="tenantBox">
+    <h3>Tenant Application Invite</h3>
 
     <input type="hidden" id="selectedPropertyId">
 
@@ -175,7 +196,7 @@
     <input type="text" id="selectedPropertyName" readonly>
 
     <label>Tenant Email</label>
-    <input type="email" id="tenantEmail">
+    <input type="email" id="tenantEmail" placeholder="tenant@email.com">
 
     <div class="row">
       <div>
@@ -209,7 +230,7 @@
     <label>Notes</label>
     <textarea id="appNotes" rows="4"></textarea>
 
-    <button onclick="createApplicationLink()">Generate Application Link</button>
+    <button class="green" onclick="createApplicationLink()">Send Email Invite / Generate Link</button>
 
     <div class="result hidden" id="linkResult">
       <h3>Application Link Created</h3>
@@ -320,7 +341,34 @@ function cancelPropertyForm(){
 async function loadProperties(){
   const data = await api("/api/properties");
   properties = data.properties || [];
+
   renderProperties();
+  renderPropertyDropdown();
+}
+
+function renderPropertyDropdown(){
+  const dropdown = document.getElementById("propertyDropdown");
+
+  dropdown.innerHTML = `<option value="">Select property</option>`;
+
+  properties.forEach(property => {
+    const option = document.createElement("option");
+    option.value = property.id;
+    option.textContent = `${property.propertyName || "No Name"} - ${property.address || ""}`;
+    dropdown.appendChild(option);
+  });
+}
+
+function choosePropertyFromDropdown(){
+  const id = document.getElementById("propertyDropdown").value;
+
+  if(!id){
+    document.getElementById("selectedPropertyPreview").classList.add("hidden");
+    document.getElementById("tenantBox").classList.add("hidden");
+    return;
+  }
+
+  selectProperty(id);
 }
 
 function renderProperties(){
@@ -339,12 +387,12 @@ function renderProperties(){
     div.innerHTML = `
       <h3>${property.propertyName || ""}</h3>
       <p><b>Address:</b> ${property.address || ""}</p>
-      <p><b>Rent:</b> ${property.defaultRent || ""}</p>
-      <p><b>Deposit:</b> ${property.defaultDeposit || ""}</p>
+      <p><b>Rent:</b> $${property.defaultRent || ""}</p>
+      <p><b>Deposit:</b> $${property.defaultDeposit || ""}</p>
       <p><b>Available:</b> ${property.defaultAvailableDate || ""}</p>
       <p><b>Pets:</b> ${property.defaultPetsAllowed || "No"}</p>
       ${property.defaultPetsAllowed !== "No" ? `<p><b>Pet Deposit / Rent:</b> ${property.defaultPetDeposit || ""}</p>` : ""}
-      <button onclick="selectProperty('${property.id}')">Create Application Link</button>
+      <button onclick="selectProperty('${property.id}')">Use This Property</button>
       <button class="gray" onclick="editProperty('${property.id}')">Edit</button>
       <button class="danger" onclick="deleteProperty('${property.id}')">Delete</button>
     `;
@@ -427,7 +475,9 @@ function selectProperty(id){
 
   if(!property) return;
 
-  document.getElementById("applicationBox").classList.remove("hidden");
+  document.getElementById("propertyDropdown").value = id;
+
+  document.getElementById("tenantBox").classList.remove("hidden");
 
   document.getElementById("selectedPropertyId").value = property.id;
   document.getElementById("selectedPropertyName").value = property.propertyName || "";
@@ -435,6 +485,22 @@ function selectProperty(id){
   document.getElementById("appDeposit").value = property.defaultDeposit || "";
   document.getElementById("appAvailableDate").value = property.defaultAvailableDate || "";
   document.getElementById("appNotes").value = property.notes || "";
+  document.getElementById("tenantEmail").value = "";
+  document.getElementById("linkResult").classList.add("hidden");
+
+  const preview = document.getElementById("selectedPropertyPreview");
+
+  preview.innerHTML = `
+    <h3>Selected Property</h3>
+    <p><b>Property:</b> ${property.propertyName || ""}</p>
+    <p><b>Address:</b> ${property.address || ""}</p>
+    <p><b>Rent:</b> $${property.defaultRent || ""}</p>
+    <p><b>Deposit:</b> $${property.defaultDeposit || ""}</p>
+    <p><b>Available:</b> ${property.defaultAvailableDate || ""}</p>
+    <p><b>Pets:</b> ${property.defaultPetsAllowed || "No"}</p>
+  `;
+
+  preview.classList.remove("hidden");
 
   if((property.defaultPetsAllowed || "No") === "No"){
     document.getElementById("appPetsSection").style.display = "none";
@@ -446,6 +512,8 @@ function selectProperty(id){
     document.getElementById("appPetDeposit").value = property.defaultPetDeposit || "";
     toggleAppPetDeposit();
   }
+
+  document.getElementById("tenantBox").scrollIntoView({ behavior:"smooth" });
 }
 
 async function createApplicationLink(){
@@ -457,13 +525,20 @@ async function createApplicationLink(){
     return;
   }
 
+  const tenantEmail = document.getElementById("tenantEmail").value;
+
+  if(!tenantEmail){
+    alert("Tenant email is required");
+    return;
+  }
+
   const petsAllowed = property.defaultPetsAllowed || "No";
 
   const body = {
     propertyId: property.id,
     propertyName: property.propertyName,
     address: property.address,
-    tenantEmail: document.getElementById("tenantEmail").value,
+    tenantEmail: tenantEmail,
     rent: document.getElementById("appRent").value,
     availableDate: property.defaultAvailableDate || "",
     deposit: document.getElementById("appDeposit").value,
@@ -525,6 +600,8 @@ Security Deposit:
 $${application.deposit}
 
 ${petText}Thank you`;
+
+  alert("Application link created. If Gmail is configured correctly, the invite was emailed to the tenant.");
 }
 
 function copyLink(){
