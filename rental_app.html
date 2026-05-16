@@ -1,32 +1,310 @@
-<label>Have you ever been evicted?</label>
-<select name="Evicted Before" onchange="toggleEvictionInfo(this)">
-  <option value="">Select</option>
-  <option>No</option>
-  <option>Yes</option>
-</select>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rental Application</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<div id="evictionInfo" style="display:none;">
-  <label>When were you evicted?</label>
-  <input type="text" name="Eviction Date">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
 
-  <label>Reason for eviction</label>
-  <textarea name="Eviction Reason" rows="3"></textarea>
+    .form-box {
+      max-width: 750px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
 
-  <label>Was the balance paid?</label>
-  <select name="Eviction Balance Paid">
-    <option value="">Select</option>
-    <option>Yes</option>
-    <option>No</option>
-    <option>Payment plan</option>
-  </select>
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
 
-  <label>Additional eviction details</label>
-  <textarea name="Eviction Additional Details" rows="3"></textarea>
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 14px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      background: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      margin-top: 25px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #005fa3;
+    }
+
+    .occupant-box {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="form-box">
+
+  <h2>Rental Application</h2>
+
+  <form action="https://formsubmit.co/oceanvacationsmb@gmail.com" method="POST">
+
+    <input type="hidden" name="_subject" value="New Tenant Application">
+    <input type="hidden" name="_captcha" value="false">
+
+    <label>Main Applicant Full Name</label>
+    <input type="text" name="Main Applicant Full Name" required>
+
+    <label>Phone Number</label>
+    <input type="tel" name="Phone Number" required>
+
+    <label>Current Address</label>
+    <textarea name="Current Address" rows="3" required></textarea>
+
+    <label>Desired Move In Date</label>
+    <input type="date" name="Desired Move In Date">
+
+    <label>Current Landlord Name</label>
+    <input type="text" name="Current Landlord Name">
+
+    <label>Current Landlord Phone</label>
+    <input type="tel" name="Current Landlord Phone">
+
+    <label>Number of Occupants</label>
+    <input 
+      type="number" 
+      id="occupantsCount" 
+      name="Number of Occupants" 
+      min="1"
+      onchange="createOccupantFields()"
+      required
+    >
+
+    <div id="occupantsBox"></div>
+
+    <label>
+      Pets?
+      <br>
+      <small>
+        Subject to HOA approval. Some HOA/properties do not allow pets.
+      </small>
+    </label>
+
+    <select name="Pets">
+      <option>No</option>
+      <option>Yes</option>
+    </select>
+
+    <label>If pets, describe</label>
+    <textarea name="Pet Details" rows="3"></textarea>
+
+    <label>Have you ever been evicted?</label>
+    <select name="Evicted Before" onchange="toggleEvictionInfo(this)">
+      <option value="">Select</option>
+      <option>No</option>
+      <option>Yes</option>
+    </select>
+
+    <div id="evictionInfo" style="display:none;">
+
+      <label>When were you evicted?</label>
+      <input type="text" name="Eviction Date">
+
+      <label>Reason for eviction</label>
+      <textarea name="Eviction Reason" rows="3"></textarea>
+
+      <label>Was the balance paid?</label>
+      <select name="Eviction Balance Paid">
+        <option value="">Select</option>
+        <option>Yes</option>
+        <option>No</option>
+        <option>Payment plan</option>
+      </select>
+
+      <label>Additional eviction details</label>
+      <textarea name="Eviction Additional Details" rows="3"></textarea>
+
+    </div>
+
+    <label>Additional Information</label>
+    <textarea name="Additional Information" rows="4"></textarea>
+
+    <button type="submit">Submit Application</button>
+
+  </form>
+
 </div>
 
 <script>
-function toggleEvictionInfo(select) {
-  const section = document.getElementById("evictionInfo");
-  section.style.display = select.value === "Yes" ? "block" : "none";
+
+function createOccupantFields() {
+
+  const count = document.getElementById("occupantsCount").value;
+  const box = document.getElementById("occupantsBox");
+
+  box.innerHTML = "";
+
+  for (let i = 1; i <= count; i++) {
+
+    box.innerHTML += `
+
+      <div class="occupant-box">
+
+        <h3>Occupant ${i}</h3>
+
+        <label>Full Name</label>
+        <input type="text" name="Occupant ${i} Full Name" required>
+
+        <label>Adult or Child</label>
+        <select name="Occupant ${i} Adult or Child" required>
+          <option value="">Select</option>
+          <option>Adult</option>
+          <option>Child</option>
+        </select>
+
+        <label>Will this person be signing the lease agreement?</label>
+        <select 
+          name="Occupant ${i} Signing Lease"
+          onchange="toggleLeaseInfo(this, ${i})"
+          required
+        >
+          <option value="">Select</option>
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+
+        <div id="leaseInfo${i}" style="display:none;">
+
+          <label>Social Security Number</label>
+          <input
+            type="password"
+            name="Occupant ${i} SSN"
+            placeholder="XXX-XX-XXXX"
+            autocomplete="off"
+          >
+
+          <label>Retype Social Security Number</label>
+          <input
+            type="password"
+            name="Occupant ${i} Retype SSN"
+            placeholder="Retype SSN"
+            autocomplete="off"
+          >
+
+          <label>Date of Birth</label>
+          <input
+            type="date"
+            name="Occupant ${i} Date of Birth"
+          >
+
+          <label>Phone Number</label>
+          <input
+            type="tel"
+            name="Occupant ${i} Phone Number"
+          >
+
+          <label>Email</label>
+          <input
+            type="email"
+            name="Occupant ${i} Email"
+            autocomplete="off"
+          >
+
+          <label>Retype Email</label>
+          <input
+            type="email"
+            name="Occupant ${i} Retype Email"
+            autocomplete="off"
+          >
+
+          <label>Employer Name</label>
+          <input
+            type="text"
+            name="Occupant ${i} Employer Name"
+          >
+
+          <label>Employer Phone</label>
+          <input
+            type="tel"
+            name="Occupant ${i} Employer Phone"
+          >
+
+          <label>Job Position</label>
+          <input
+            type="text"
+            name="Occupant ${i} Job Position"
+          >
+
+          <label>Monthly Income</label>
+          <input
+            type="text"
+            name="Occupant ${i} Monthly Income"
+          >
+
+          <label>How long employed?</label>
+          <input
+            type="text"
+            name="Occupant ${i} Employment Length"
+          >
+
+        </div>
+
+      </div>
+
+    `;
+  }
 }
+
+function toggleLeaseInfo(select, number) {
+
+  const section = document.getElementById("leaseInfo" + number);
+
+  if (select.value === "Yes") {
+    section.style.display = "block";
+  } else {
+    section.style.display = "none";
+  }
+}
+
+function toggleEvictionInfo(select) {
+
+  const section = document.getElementById("evictionInfo");
+
+  if (select.value === "Yes") {
+    section.style.display = "block";
+  } else {
+    section.style.display = "none";
+  }
+}
+
 </script>
+
+</body>
+</html>
