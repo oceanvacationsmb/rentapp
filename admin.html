@@ -29,23 +29,28 @@ function login() {
 async function api(path, options = {}) {
 
   const response = await fetch(
-    API_BASE + path,
+    "https://rentapp-0jgt.onrender.com" + path,
     {
-      ...options,
+      method: options.method || "GET",
 
       headers: {
         "Content-Type": "application/json",
-        "x-admin-password": adminPassword,
-        ...(options.headers || {})
-      }
+        "x-admin-password": adminPassword
+      },
+
+      body: options.body || null
     }
   );
 
   const data = await response.json();
 
+  console.log(data);
+
   if (!data.success) {
-    alert(data.error || "Something went wrong");
-    throw new Error(data.error || "Request failed");
+
+    alert(data.error || "API Error");
+
+    throw new Error(data.error || "API Error");
   }
 
   return data;
